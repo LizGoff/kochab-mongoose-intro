@@ -1,55 +1,54 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const PORT = process.envPORT || 5000;
 const app = express();
-
+const mongoose = require('mongoose');
 
 // files go here
-// const books = require('./modules/booksArray');
 
-const bookCollection = [
-    {
-    title: "A Tale of Two Cities",
-    author: "Charles Dickens",
-    edition: 2,
-    published: '1859-05-20'
-  },
-  {
-    title: "Murder on the Orient Express",
-    author: "Agatha Christie",
-    edition: 2
-  },
-  {
-    title: "Snow Crash",
-    author: "Neal Steve",
-    edition: 1.2,
-    ratings: [
-      {score: 5},
-      {score: 1}
-    ]
-    },
-    {
-    title: "Catcher in the Rye",
-    author: "Someone",
-    edition: 1,
-    ratings: [
-      {score: 2},
-      {score: 5},
-      {score: 3.5},
-      {score: 4}
-    ]
-    }
-];
+// eg. const books = require('./modules/booksArray');
+const Book = require('./models/book.schema');
 
 
-// app.use(express.static('/server/server'));
-// app.use(bodyParser.urlencoded({extended: true}));
+// -------------- Connecting to Mongo start --------------- //
 
+const databaseUrl = 'mongodb://localhost:27017/library';
+mongoose.connect(databaseUrl);
 
-app.get('/books', (req,res) => {
-    res.send(bookCollection);
+mongoose.connection.on('connection', () => {
+    console.log(`mongoose connected to ${databaseUrl}`);
 });
 
-app.listen(PORT, () =>{
-console.log(`running on port ${PORT}`);
+mongoose.connection.on('error', (error) => {
+    console.log('mongoose connection error', error)
+});
+
+// ------------- Connecting to Mongo end ----------------- //
+
+
+// Get route for /books
+app.get('/books', (req, res) => {
+
+// ------- database read or find ------ //
+
+    Book.find({})
+        .then((dataFromTheDatabase) => {
+        // success and good things happen    
+            console.log('data from database', dataFromTheDatabase);
+            res.send(dataFromTheDatabase);
+
+        })
+        // error and bad things happen. make sure to put this in
+        // or it may be a security risk as the client can see
+        // the error with your code
+
+        .catch((error) => {
+            console.log('error with Book.find', error);
+            res.sendStatus(500);
+        });
+
+});
+
+app.listen(PORT, () => {
+    console.log(`running on port ${PORT}`);
 });
