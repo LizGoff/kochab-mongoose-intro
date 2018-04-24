@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Route();
-// const mongoose = require('mongoose');
 
 
 // move route to /routes/book.route.js
+
 // Get route for /books
 router.get('/books', (req, res) => {
 
